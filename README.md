@@ -1,6 +1,5 @@
 ## Description
-*Insert here a brief description of the project, including, purpose, technologies used and context 
-where it was created.*
+Se analiza el comportamiento del USD_MXN durante el comunicado del indicador API Weekly Crude Oil Stock - United States de la economía de USA. 
 
 ## Install dependencies
 
