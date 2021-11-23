@@ -13,6 +13,8 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import datetime
+import MetaTrader5 as mt
+import pytz
 
 # leer índice económico
 indice = pd.read_csv(r'C:\Users\ariad\OneDrive\Documentos\GitHub\myst_proyecto_1\files\API Weekly Crude Oil Stock - United States.txt')
@@ -23,6 +25,16 @@ indice.Previous.iloc[-1] = indice.Actual.iloc[-1]
 # Si un renglón no tiene "Consensus", asígnale el "Previous" del mismo renglón. (arreglamos eso)
 indice.Consensus = indice.Previous
 indice = indice.drop('Revised',axis=1)
+#indice = indice.sort_values('DateTime')
+
+# Quitamos los valores de los años anteriores a lo que necesitamos 
+df_index = {}
+for i in range(len(indice)):
+    indice.DateTime = pd.to_datetime(indice.DateTime)
+    if indice.DateTime[i]  >= datetime.datetime(2019,1,1):
+        df_index = indice.iloc[:i+1,:]
+# extraemos y renombramos 
+indice = df_index
 
 # descargamos un par de divisas relacionadas de los últimos dos años 
 # date_format = "%Y-%m-%d"
@@ -54,5 +66,25 @@ EUR_AUD_2021 = pd.read_csv(r'C:\Users\ariad\OneDrive\Documentos\GitHub\myst_proy
 EUR_AUD = EUR_AUD_2019.append(EUR_AUD_2020)
 EUR_AUD = EUR_AUD_2019.append(EUR_AUD_2021)
 
+def historico(ticker, date_from, date_to):
+#del archivo donde estan los datos de inicio de sesión
+    param_archivo = pd.read_csv(r'C:\Users\ariad\OneDrive\Documentos\GitHub\myst_proyecto_1\files\cuentas.csv')
+    Names = list(param_archivo['Name'])
+    Users = list(param_archivo['Account'])
+    Passwords = list(param_archivo['Password'])
+    
+    #iniciar conexión con MT5
+    mt.initialize(login=Users[0], server='FxPro-MT5',password=Passwords[0])
+    # obtenemos las barras 
+    rates = mt.copy_rates_range(ticker, mt.TIMEFRAME_M1, date_from, date_to)  
+    # finalizamos la conexión 
+    # mt.shutdown()
+    # creamos un DataFrame de los datos obtenidos
+    rates_frame = pd.DataFrame(rates)
+    # convertimos la hora en segundos al formato datetime
+    rates_frame['time']=pd.to_datetime(rates_frame['time'], unit='s')
+    return rates_frame
 
+# divisa = historico('EURUSD', datetime.datetime(2020,1,1), datetime.datetime(2020,1,2))
 
+# rates = mt.copy_rates_range('EURUSD', mt.TIMEFRAME_M1, datetime.datetime(2020,1,1), datetime.datetime(2020,1,2)) 

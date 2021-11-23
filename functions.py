@@ -16,6 +16,7 @@ import numpy as np
 
 #clasificacion de escenarios del indice 
 def clas_esc(df_indice):
+    # clasificación de escenarios: A, B, C, D
     df_indice['Escenario'] = ''
     for i in range(len(df_indice)):
         if df_indice.Actual[i] >= df_indice.Consensus[i] and df_indice.Consensus[i] >= df_indice.Previous[i]:
@@ -26,11 +27,21 @@ def clas_esc(df_indice):
             df_indice.Escenario.iloc[i] = 'C'
         elif df_indice.Actual[i] < df_indice.Consensus[i] and df_indice.Consensus[i] < df_indice.Previous[i]:
             df_indice.Escenario.iloc[i] = 'D'
-        
+    # tipo: compra o venta 
+    df_indice['Operacion']= ''
+    for i in range(len(df_indice)):
+        if df_indice.Escenario[i] == 'B' or df_indice.Escenario[i] == 'D':
+            df_indice.Operacion = 'Sell'
+        else:
+            df_indice.Operacion = 'Buy'  
+
     return df_indice
 
+    
+
+
 df_indice = d.indice
-df_divisas = d.USD_GBP
+df_divisas = d.EUR_AUD
 
 def get_metricas(df_indice, df_divisas):
     '''
