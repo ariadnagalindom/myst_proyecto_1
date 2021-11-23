@@ -11,9 +11,14 @@
 # importamos 
 import importlib 
 import data as d
+import pandas as pd
 
-importlib.reload(d)
+# importlib.reload(d)
 
-print(d.indice)
-
-print(d.USD_MXN)
+# índicador 
+# print(d.indice)
+# divisa
+# print(d.USD_MXN)
+# reglas escenarios
+escenarios = {'Escenario': ['A','B','C','D'],'Regla':['Actual>=Consensus>=Previous','Actual>=Consensus<Previous','Actual<Consensus>=Previous','Actual<Consensus<Previous']}
+escenarios = pd.DataFrame(escenarios)
