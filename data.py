@@ -31,11 +31,11 @@ indice = indice.drop('Revised',axis=1)
 df_index = {}
 for i in range(len(indice)):
     indice.DateTime = pd.to_datetime(indice.DateTime)
-    if indice.DateTime[i]  >= datetime.datetime(2019,1,1):
+    if indice.DateTime[i]  >= datetime.datetime(2018,1,1):
         df_index = indice.iloc[:i+1,:]
 # extraemos y renombramos 
 indice = df_index
-
+indice = indice.sort_values('DateTime').reset_index()
 # descargamos un par de divisas relacionadas de los últimos dos años 
 # date_format = "%Y-%m-%d"
 # start =datetime.datetime.strptime('2018-11-01', date_format).date()
@@ -66,7 +66,7 @@ EUR_AUD_2021 = pd.read_csv(r'C:\Users\ariad\OneDrive\Documentos\GitHub\myst_proy
 EUR_AUD = EUR_AUD_2019.append(EUR_AUD_2020)
 EUR_AUD = EUR_AUD_2019.append(EUR_AUD_2021)
 
-def historico(ticker, date_from, date_to):
+def historico(ticker):
 #del archivo donde estan los datos de inicio de sesión
     param_archivo = pd.read_csv(r'C:\Users\ariad\OneDrive\Documentos\GitHub\myst_proyecto_1\files\cuentas.csv')
     Names = list(param_archivo['Name'])
@@ -75,16 +75,29 @@ def historico(ticker, date_from, date_to):
     
     #iniciar conexión con MT5
     mt.initialize(login=Users[0], server='FxPro-MT5',password=Passwords[0])
-    # obtenemos las barras 
-    rates = mt.copy_rates_range(ticker, mt.TIMEFRAME_M1, date_from, date_to)  
-    # finalizamos la conexión 
-    # mt.shutdown()
-    # creamos un DataFrame de los datos obtenidos
-    rates_frame = pd.DataFrame(rates)
-    # convertimos la hora en segundos al formato datetime
-    rates_frame['time']=pd.to_datetime(rates_frame['time'], unit='s')
+    if not mt.initialize(): 
+        print("initialize() failed, error code =",mt.last_error()) 
+        quit() 
+    # establecemos el huso horario en UTC 
+    timezone = pytz.timezone("Etc/UTC") 
+    # creamos el objeto datetime en el huso horario UTC, para que no se aplique el desplazamiento del huso horario local 
+    date_from = datetime.datetime(2018, 1, 1, tzinfo=timezone)
+    date_to = datetime.datetime(2020,3,1,tzinfo=timezone) 
+    # obtenemos 10 barras de EURUSD H4 a partir del 01.10.2020 en el huso horario UTC 
+    rates = mt.copy_rates_range(ticker, mt.TIMEFRAME_M15, date_from, date_to) 
+    
+    # finalizamos la conexión con el terminal MetaTrader 5 
+    mt.shutdown() 
+    # creamos un DataFrame de los datos obtenidos 
+    rates_frame = pd.DataFrame(rates) 
+    # convertimos la hora en segundos al formato datetime 
+    rates_frame['time']=pd.to_datetime(rates_frame['time'], unit='s')              
+    # mostramos los datos  
     return rates_frame
+   
+   
+divisa = historico('EURUSD') #prueba
 
-# divisa = historico('EURUSD', datetime.datetime(2020,1,1), datetime.datetime(2020,1,2))
+#print(divisa.tail())
+#print(divisa.head())
 
-# rates = mt.copy_rates_range('EURUSD', mt.TIMEFRAME_M1, datetime.datetime(2020,1,1), datetime.datetime(2020,1,2)) 

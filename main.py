@@ -22,3 +22,5 @@ import pandas as pd
 # reglas escenarios
 escenarios = {'Escenario': ['A','B','C','D'],'Regla':['Actual>=Consensus>=Previous','Actual>=Consensus<Previous','Actual<Consensus>=Previous','Actual<Consensus<Previous']}
 escenarios = pd.DataFrame(escenarios)
+
+
